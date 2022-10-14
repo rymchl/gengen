@@ -16,6 +16,8 @@
 
 int main()
 {
+    std::cout << "hey\n";
+    return -1;
     // Init all GLFW/GLEW stuff and grab window*
     GLFWwindow* window = init_glfw(SCR_WIDTH, SCR_HEIGHT, "gengen");
 
@@ -25,11 +27,8 @@ int main()
 
     // load models
     // -----------
-    Model test_model("models/bigboy/bigboy.obj");
-
-    glm::vec3 lightPos(1,1,1);
-   
-    float theta = 0.0f;
+    Model background("models/map/background.obj");
+    Model ground("models/map/ground.obj");
 
     // render loop
     // -----------
@@ -42,16 +41,14 @@ int main()
         lastFrame = currentFrame;
 
 
-        lightPos = glm::vec3(cos(theta),1.0f,sin(theta));
-        theta += deltaTime * 0.25f;
-
-
         // input
         // -----
         processInput(window);
 
         shader.setVec3("cameraPos",camera.Position);
-        shader.setVec3("lightPos",lightPos);
+
+        
+        shader.setVec3("lightPos",player.position + glm::vec3(0,0.25f,0));
 
         // render
         // ------
@@ -62,7 +59,13 @@ int main()
         shader.use();
 
         // view/projection transformations
-        glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+        
+        glm::mat4 projection(1,0,0,0,
+                             0,1,0,0,
+                             0,0,0,0,
+                             0,0,0,1);
+        
+        //glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
         glm::mat4 view = camera.GetViewMatrix();
         shader.setMat4("projection", projection);
         shader.setMat4("view", view);
@@ -72,8 +75,16 @@ int main()
         model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); 
         model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	
         shader.setMat4("model", model);
-        test_model.draw(shader);
+        background.draw(shader);
+        ground.draw(shader);
 
+        //draw player
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); 
+        model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	
+        model = glm::rotate(model, player.rotation, glm::vec3(0,1,0));
+        shader.setMat4("model", model);
+        player.draw(shader);
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------

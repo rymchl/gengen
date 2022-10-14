@@ -12,9 +12,7 @@ unsigned int TextureFromFile(const char *path, const std::string &directory, boo
 #endif
 
 // constructor, expects a filepath to a 3D model.
-Model::Model(std::string const &path, bool gamma) : gammaCorrection(gamma){
-    loadModel(path);
-}
+Model::Model(std::string const &path, bool gamma) : gammaCorrection(gamma){ loadModel(path); }
 
 // draws the model, and thus all its meshes
 void Model::draw(Shader &shader)
@@ -22,6 +20,7 @@ void Model::draw(Shader &shader)
     for(unsigned int i = 0; i < meshes.size(); i++)
         meshes[i].draw(shader);
 }
+
 
 // loads a model with supported ASSIMP extensions from file and stores the resulting meshes in the meshes vector.
 void Model::loadModel(std::string const &path)
@@ -237,3 +236,4 @@ unsigned int TextureFromFile(const char *path, const std::string &directory, boo
 
     return textureID;
 }
+

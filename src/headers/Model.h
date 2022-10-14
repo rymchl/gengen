@@ -18,6 +18,7 @@ class Model{
 
         Model(std::string const &path, bool gamma = false);
         void draw(Shader &shader);	
+
     private:
         // model data
         std::vector<Mesh> meshes;
