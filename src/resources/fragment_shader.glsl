@@ -12,7 +12,7 @@ uniform vec3 cameraPos;
 const vec3 sunDir = vec3(1,-1,1);
 const float sunBrightness = 0.15f;
 
-const int CEL_STEPS = 4;
+const int CEL_STEPS = 3;
 
 void main()
 {    
@@ -63,5 +63,6 @@ void main()
         }
     }
 
+    
     FragColor = texture_color * final_coeff;
 }

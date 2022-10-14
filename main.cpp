@@ -29,6 +29,8 @@ int main()
 
     glm::vec3 lightPos(1,1,1);
    
+    float theta = 0.0f;
+
     // render loop
     // -----------
     while (!glfwWindowShouldClose(window))
@@ -38,6 +40,11 @@ int main()
         float currentFrame = static_cast<float>(glfwGetTime());
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
+
+
+        lightPos = glm::vec3(cos(theta),1.0f,sin(theta));
+        theta += deltaTime * 0.25f;
+
 
         // input
         // -----
