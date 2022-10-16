@@ -3,7 +3,7 @@
 unsigned int TextureFromFile(const char *path, const std::string &directory, bool gamma = false);
 
 
-#ifdef DEBUG
+#ifdef DEBUG_MODEL
 #define LOG(x) std::cout << "MODEL DEBUG LOG: " << x << std::endl
 
 #else 
@@ -51,25 +51,24 @@ void Model::loadModel(std::string const &path)
 // processes a node in a recursive fashion. Processes each individual mesh located at the node and repeats this process on its children nodes (if any).
 void Model::processNode(aiNode *node, const aiScene *scene)
 {
+    LOG("PROCESS_NODE<0>");
     // process each mesh located at the current node
     for(unsigned int i = 0; i < node->mNumMeshes; i++)
-    {
+    {  
+        
         // the node object only contains indices to index the actual objects in the scene. 
         // the scene contains all the data, node is just to keep stuff organized (like relations between nodes).
-        LOG("processNode1");
         aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-        LOG("processNode2");
+        
         meshes.push_back(processMesh(mesh, scene));
-        LOG("processNode3");
     }
+    LOG("PROCESS_NODE<1>");
     // after we've processed all of the meshes (if any) we then recursively process each of the children nodes
     for(unsigned int i = 0; i < node->mNumChildren; i++)
     {
-        LOG("processNode5");
         processNode(node->mChildren[i], scene);
-        LOG("processNode6");
     }
-
+    LOG("PROCESS_NODE<RET>");
 }
 
 Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
@@ -79,7 +78,7 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
     std::vector<unsigned int> indices;
     std::vector<Texture> textures;
 
-
+    LOG("PROCESS_MESH<0>");
     // walk through each of the mesh's vertices
     for(unsigned int i = 0; i < mesh->mNumVertices; i++)
     {
@@ -88,7 +87,7 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
         Vertex vertex;
         glm::vec3 vector; // we declare a placeholder vector since assimp uses its own vector class that doesn't directly convert to glm's vec3 class so we transfer the data to this placeholder glm::vec3 first.
         // positions
-        vector.x = mesh->mVertices[i].x;
+        vector.x = - mesh->mVertices[i].x; //Blender is flipped on x
         vector.y = mesh->mVertices[i].y;
         vector.z = mesh->mVertices[i].z;
         vertex.Position = vector;
@@ -128,6 +127,7 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
         }
         vertices.push_back(vertex);
     }
+    LOG("PROCESS_MESH<1>");
     // now wak through each of the mesh's faces (a face is a mesh its triangle) and retrieve the corresponding vertex indices.
     for(unsigned int i = 0; i < mesh->mNumFaces; i++)
     {
@@ -136,6 +136,7 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
         for(unsigned int j = 0; j < face.mNumIndices; j++)
             indices.push_back(face.mIndices[j]);        
     }
+    LOG("PROCESS_MESH<2>");
     // process materials
     aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];    
     // we assume a convention for sampler names in the shaders. Each diffuse texture should be named
@@ -158,6 +159,8 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
     std::vector<Texture> heightMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, "texture_height");
     textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
     
+    LOG("PROCESS_MESH<RET>");
+
     // return a mesh object created from the extracted mesh data
     return Mesh(vertices, indices, textures);
 }
@@ -166,6 +169,7 @@ Mesh Model::processMesh(aiMesh *mesh, const aiScene *scene)
 // the required info is returned as a Texture struct.
 std::vector<Texture> Model::loadMaterialTextures(aiMaterial *mat, aiTextureType type, std::string const& typeName)
 {
+    LOG("LOAD_MATERIAL_TEXTURES<0>");
     std::vector<Texture> textures;
     for(unsigned int i = 0; i < mat->GetTextureCount(type); i++)
     {
@@ -192,6 +196,7 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial *mat, aiTextureType 
             textures_loaded.push_back(texture);  // store it as texture loaded for entire model, to ensure we won't unnecesery load duplicate textures.
         }
     }
+    LOG("LOAD_MATERIAL_TEXTURES<RET>");
     return textures;
 }
 
@@ -199,16 +204,25 @@ std::vector<Texture> Model::loadMaterialTextures(aiMaterial *mat, aiTextureType 
 
 unsigned int TextureFromFile(const char *path, const std::string &directory, bool gamma)
 {
+    LOG("TEXTURE_FROM_FILE<0>");
     std::string filename = std::string(path);
     filename = directory + '/' + filename;
-
+    LOG("TEXTURE_FROM_FILE<1>");
     unsigned int textureID;
     glGenTextures(1, &textureID);
-
+    LOG("TEXTURE_FROM_FILE<2>");
     int width, height, nrComponents;
+    LOG("TEXTURE_FROM_FILE<3> : stbi_load-ing " << path);
     unsigned char *data = stbi_load(filename.c_str(), &width, &height, &nrComponents, 0);
+
+    if(width%2 == 1 || height%2 == 1){
+        std::cout << "WARNING: TEXTUREFILE <" << path << "> HASS ODD WIDTH OR HEIGHT. MAY CAUSE ISSUES!" << std::endl;
+    }
+    
+    LOG("TEXTURE_FROM_FILE<3> : stbi_load successful");
     if (data)
     {
+        LOG("TEXTURE_FROM_FILE<4_IF>");
         GLenum format;
         if (nrComponents == 1)
             format = GL_RED;
@@ -230,10 +244,11 @@ unsigned int TextureFromFile(const char *path, const std::string &directory, boo
     }
     else
     {
+        LOG("TEXTURE_FROM_FILE<4_ELSE>");
         std::cout << "Texture failed to load at path: " << path << std::endl;
         stbi_image_free(data);
     }
-
+    LOG("TEXTURE_FROM_FILE<RET>");
     return textureID;
 }
 

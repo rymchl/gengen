@@ -9,17 +9,23 @@
 #include <Camera.h>
 #include <Model.h>
 
+#include <GameState.h>
+GameState gamestate;
+
 #include <init_glfw.h>
 #include <input.h>
+
+
 
 #include <iostream>
 
 int main()
 {
-    std::cout << "hey\n";
-    return -1;
     // Init all GLFW/GLEW stuff and grab window*
     GLFWwindow* window = init_glfw(SCR_WIDTH, SCR_HEIGHT, "gengen");
+
+    // Init player    
+    player_ptr = new Player("models/player/boshy.obj");
 
     // build and compile shaders
     // -------------------------
@@ -29,6 +35,9 @@ int main()
     // -----------
     Model background("models/map/background.obj");
     Model ground("models/map/ground.obj");
+
+    float sky_x_off = 0;
+    float ground_x_off = 0;
 
     // render loop
     // -----------
@@ -40,15 +49,15 @@ int main()
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
+        sky_x_off += 0.0025f * deltaTime;
 
         // input
         // -----
         processInput(window);
 
-        shader.setVec3("cameraPos",camera.Position);
+        if(player_ptr->position.x > 0.5f) ground_x_off = player_ptr->position.x - 0.5f;
 
-        
-        shader.setVec3("lightPos",player.position + glm::vec3(0,0.25f,0));
+
 
         // render
         // ------
@@ -58,33 +67,22 @@ int main()
         // don't forget to enable shader before setting uniforms
         shader.use();
 
-        // view/projection transformations
-        
-        glm::mat4 projection(1,0,0,0,
-                             0,1,0,0,
-                             0,0,0,0,
-                             0,0,0,1);
-        
-        //glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-        glm::mat4 view = camera.GetViewMatrix();
-        shader.setMat4("projection", projection);
-        shader.setMat4("view", view);
+        // draw all
 
-        // render the loaded model
-        glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); 
-        model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	
-        shader.setMat4("model", model);
+        shader.setVec2("uv_scale",glm::vec2(1,1));
+        shader.setVec2("vertex_offset",glm::vec2(0,0));
+
+        shader.setVec2("uv_offset",glm::vec2(sky_x_off,0) + player_ptr->map_offset * 0.01f);
         background.draw(shader);
+
+        shader.setVec2("uv_offset",player_ptr->map_offset * 8.0f);
         ground.draw(shader);
 
-        //draw player
-        model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); 
-        model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	
-        model = glm::rotate(model, player.rotation, glm::vec3(0,1,0));
-        shader.setMat4("model", model);
-        player.draw(shader);
+
+        shader.setVec2("uv_offset",glm::vec2(0,0));
+        shader.setVec2("vertex_offset",player_ptr->position);
+        shader.setVec2("uv_scale",player_ptr->lookingRight ? glm::vec2(1,1) : glm::vec2(-1,1));
+        player_ptr->draw(shader);
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------

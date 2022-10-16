@@ -14,13 +14,16 @@ enum PlayerMovement{
 class Player{
 
     public:
-        glm::vec3 position;
-        float rotation;
+        glm::vec2 position;
+        glm::vec2 map_offset;
 
-        Player(std::string model_path) : model(model_path), position(0,0,0), rotation(0) {}  
+        float rotation;
+        bool lookingRight;
+
+        Player(std::string model_path) : model(model_path), position(0,0), rotation(0), map_offset(0,0) {}  
 
         void rotate(float dr);
-        void move(glm::vec3 dp);
+        void move(glm::vec2 dp);
 
         void ProcessKeyboard(PlayerMovement direction, float deltaTime);
         

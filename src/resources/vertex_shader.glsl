@@ -4,17 +4,12 @@ layout (location = 1) in vec3 aNormal;
 layout (location = 2) in vec2 aTexCoords;
 
 out vec2 TexCoords;
-out vec3 worldPos;
-out vec3 worldNormal;
 
-uniform mat4 model;
-uniform mat4 view;
-uniform mat4 projection;
+uniform vec2 vertex_offset;
+
 
 void main()
 {
     TexCoords = aTexCoords;    
-    gl_Position = projection * view * model * vec4(aPos, 1.0);
-    worldPos = aPos;
-    worldNormal = aNormal;
+    gl_Position = vec4(aPos, 1.0) + vec4(vertex_offset.x, vertex_offset.y, 0, 0);
 }
