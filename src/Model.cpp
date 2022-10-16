@@ -2,7 +2,7 @@
 
 unsigned int TextureFromFile(const char *path, const std::string &directory, bool gamma = false);
 
-
+//#define DEBUG_MODEL 
 #ifdef DEBUG_MODEL
 #define LOG(x) std::cout << "MODEL DEBUG LOG: " << x << std::endl
 
@@ -12,7 +12,11 @@ unsigned int TextureFromFile(const char *path, const std::string &directory, boo
 #endif
 
 // constructor, expects a filepath to a 3D model.
-Model::Model(std::string const &path, bool gamma) : gammaCorrection(gamma){ loadModel(path); }
+Model::Model(std::string const &path, bool gamma) : gammaCorrection(gamma){ 
+    LOG("Loading model : " << path);
+    loadModel(path); 
+    LOG("Loading model success... ");
+}
 
 // draws the model, and thus all its meshes
 void Model::draw(Shader &shader)

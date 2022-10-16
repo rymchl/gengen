@@ -8,7 +8,8 @@ enum PlayerMovement{
     PLAYER_LEFT = 0,
     PLAYER_RIGHT,
     PLAYER_UP,
-    PLAYER_DOWN
+    PLAYER_DOWN,
+    PLAYER_IDLE
 };
 
 class Player{
@@ -17,10 +18,11 @@ class Player{
         glm::vec2 position;
         glm::vec2 map_offset;
 
-        float rotation;
-        bool lookingRight;
+        PlayerMovement current_movement = PlayerMovement::PLAYER_IDLE;
+        unsigned int model_frame = 0;
 
-        Player(std::string model_path) : model(model_path), position(0,0), rotation(0), map_offset(0,0) {}  
+
+        Player();
 
         void rotate(float dr);
         void move(glm::vec2 dp);
@@ -30,7 +32,9 @@ class Player{
         void draw(Shader& shader);
         
     private:
-        Model model;
+        std::vector< std::vector<Model> > models;
+
+       
         
 
 };

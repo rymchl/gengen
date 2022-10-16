@@ -1,7 +1,27 @@
 #include <Player.h>
 
-void Player::rotate(float dr){
-    rotation = rotation + dr;
+Player::Player() : position(0,0), map_offset(0,0) {
+
+    std::vector<Model> left_models   = {};
+    std::vector<Model> right_models  = {};
+    std::vector<Model> jump_models   = {};
+    std::vector<Model> idle_models   = {};
+    std::vector<Model> crouch_models = {};
+
+    left_models.push_back(Model("models/eggy/eggy_left0.obj"));
+
+    right_models.push_back(Model("models/eggy/eggy_right0.obj"));
+    
+    idle_models.push_back(Model("models/eggy/eggy_idle0.obj"));
+
+    models = {
+        left_models,
+        right_models,
+        jump_models,
+        crouch_models,
+        idle_models
+    };
+
 }
 
 void Player::move(glm::vec2 dp){
@@ -9,7 +29,7 @@ void Player::move(glm::vec2 dp){
 }
 
 void Player::ProcessKeyboard(PlayerMovement direction, float deltaTime){
-    std::cout << position.x << std::endl;
+    current_movement = direction;
     switch(direction){
         case PlayerMovement::PLAYER_LEFT:
             
@@ -21,7 +41,6 @@ void Player::ProcessKeyboard(PlayerMovement direction, float deltaTime){
                 }
             }
             else map_offset += glm::vec2(-1,0)*deltaTime;
-            lookingRight = false;
             return;
 
         case PlayerMovement::PLAYER_RIGHT:
@@ -34,15 +53,21 @@ void Player::ProcessKeyboard(PlayerMovement direction, float deltaTime){
                 }
             }
             else map_offset += glm::vec2(1,0)*deltaTime;
-            lookingRight = true;
 
         case PlayerMovement::PLAYER_UP:
             return;
         case PlayerMovement::PLAYER_DOWN:
             return;
+        case PlayerMovement::PLAYER_IDLE:
+            return;
     };
 }
 
 void Player::draw(Shader& shader){
-    model.draw(shader);
+    shader.setVec2("uv_scale",glm::vec2(1,1));
+    shader.setVec2("uv_offset",glm::vec2(0,0));
+    
+    shader.setVec2("vertex_offset",position);
+    
+    models[current_movement][model_frame].draw(shader);
 }

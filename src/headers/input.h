@@ -12,8 +12,10 @@ void processInput(GLFWwindow *window)
         glfwSetWindowShouldClose(window, true);
     if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
         player_ptr->ProcessKeyboard(PlayerMovement::PLAYER_LEFT, deltaTime);
-    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+    else if(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         player_ptr->ProcessKeyboard(PlayerMovement::PLAYER_RIGHT, deltaTime);
+    else 
+        player_ptr->ProcessKeyboard(PlayerMovement::PLAYER_IDLE, deltaTime);
     /*
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
         camera.ProcessKeyboard(FORWARD, deltaTime);
