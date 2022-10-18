@@ -64,3 +64,46 @@ void Mesh::draw(Shader &shader)
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
 }  
+
+bool Mesh::check_collision(Mesh* mesh){
+    std::vector<Tri> trisA;
+    std::vector<Tri> trisB;
+
+    std::vector<glm::vec3*> tri_points;
+    int i = 0;
+    for(const unsigned int &index : indices){
+        
+        tri_points.push_back(&vertices[index].Position);
+        i++;
+        
+        if(i % 3 == 0){
+            trisA.push_back(Tri(tri_points[0],tri_points[1],tri_points[2]));
+            tri_points.clear();
+            i = 0;
+        }
+
+    }
+
+    //i should = 0 and tri_points should be empty
+
+    for(const unsigned int &index : mesh->indices){
+        
+        tri_points.push_back(&mesh->vertices[index].Position);
+        i++;
+        
+        if(i % 3 == 0){
+            trisB.push_back(Tri(tri_points[0],tri_points[1],tri_points[2]));
+            tri_points.clear();
+            i = 0;
+        }
+
+    }
+
+    for(const Tri& A : trisA){
+        for(const Tri& B : trisB){
+            if(A.check_collision(&B)) return true;
+        }
+    }
+
+    return false;
+}
