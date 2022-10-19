@@ -41,8 +41,6 @@ int main()
     player_ptr = new Player();
     Map map;
 
-    glm::vec2 gravity(0,-9.81);
-    glm::vec2 external_forces(0,0);
     // build and compile shaders
     // -------------------------
     Shader shader("src/resources/vertex_shader.glsl", "src/resources/fragment_shader.glsl");

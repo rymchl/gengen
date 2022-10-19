@@ -6,10 +6,12 @@ layout (location = 2) in vec2 aTexCoords;
 out vec2 TexCoords;
 
 uniform vec2 vertex_offset;
+uniform float depth_offset;
 
 
 void main()
 {
     TexCoords = aTexCoords;    
-    gl_Position = vec4(aPos, 1.0) + vec4(vertex_offset.x, vertex_offset.y, 0, 0);
+    
+    gl_Position = vec4(aPos, 1.0) + vec4(vertex_offset.x, vertex_offset.y, depth_offset , 0);
 }

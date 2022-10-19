@@ -1,11 +1,19 @@
 #include <Map.h>
 
-Map::Map(): ground("models/eggy/map/eggy_ground.obj"), moon("models/eggy/map/eggy_moon.obj"){
-    background_layers.push_back(Model("models/eggy/map/eggy_background_0.obj"));
-    background_layers.push_back(Model("models/eggy/map/eggy_background_1.obj"));
-    background_layers.push_back(Model("models/eggy/map/eggy_background_2.obj"));
-    background_layers.push_back(Model("models/eggy/map/eggy_background_3.obj"));
-    background_layers.push_back(Model("models/eggy/map/eggy_background_4.obj"));
+Map::Map(): ground("models/eggy/map/eggy_ground.obj"), background_tex_count(6){
+
+    std::vector<std::string> tex_paths = {
+        "models/eggy/map/eggy_background_0.png",
+        "models/eggy/map/eggy_background_1.png",
+        "models/eggy/map/eggy_background_2.png",
+        "models/eggy/map/eggy_background_3.png",
+        "models/eggy/map/eggy_background_4.png",
+        "models/eggy/map/eggy_background_5.png"
+    };
+
+    Model templateModel("models/eggy/map/eggy_background_template.obj");
+
+    background = Mesh(templateModel.meshes[0].vertices,templateModel.meshes[0].indices,tex_paths);
 
     //Active terrain
     for(Mesh &mesh : ground.meshes){
@@ -20,21 +28,31 @@ void Map::draw(Shader& shader, glm::vec2 offset){
     shader.setVec2("uv_scale",glm::vec2(1,1));
     shader.setVec2("uv_offset",glm::vec2(0,0));
     shader.setVec2("vertex_offset",glm::vec2(0,0));
+    
 
+    
     //draw true bg
-    background_layers[0].draw(shader);
+    shader.setFloat("depth_offset", -.05);
+    background.active_texture = 0;
+    background.draw(shader);
 
     //draw moon
-    moon.draw(shader);
+    shader.setFloat("depth_offset", -.1f);
+    background.active_texture = 1;
+    background.draw(shader);
 
     float speedup = 2.05f;
 
     //draw extas
-    for(int i = 1; i < background_layers.size(); i++){
+    for(int i = 2; i < background_tex_count; i++){
+        background.active_texture = i;
+        shader.setFloat("depth_offset", ( -i * 0.1f));
         float direction = i%2==0 ? -1.0f : 1.0f;
         shader.setVec2("uv_offset",glm::vec2(1,0) * direction * speedup * ((time_offset*i*speedup + offset.x)*0.001f));
-        background_layers[i].draw(shader);
+        background.draw(shader);
     }
+
+    shader.setFloat("depth_offset", 0);
 
     //draw ground
     shader.setVec2("uv_offset",glm::vec2(-1,0) * offset.x * 8.0f);

@@ -6,9 +6,12 @@
 class Map{
 
     public:
+        
+        //Model moon;
+        //std::vector<Model> background_layers = {};
+        Mesh background;
+        unsigned int background_tex_count;
         Model ground;
-        Model moon;
-        std::vector<Model> background_layers = {};
         std::vector<Mesh*> terrain_meshes;
         float time_offset;
 

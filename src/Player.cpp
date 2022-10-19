@@ -12,40 +12,41 @@ Player::Player() :
     texture_index(0){
 
     std::vector<std::string> tex_paths{
-        "models/eggy/eggy_idle_0.png",
-        "models/eggy/eggy_idle_1.png",
-        "models/eggy/eggy_idle_2.png",
-        "models/eggy/eggy_idle_3.png",
+        "models/eggy/eggy_idle_0.png",  //0
+        "models/eggy/eggy_idle_1.png",  //1
+        "models/eggy/eggy_idle_2.png",  //2
+        "models/eggy/eggy_idle_3.png",  //3
 
-        "models/eggy/eggy_left_0.png",
-        "models/eggy/eggy_left_1.png",
-        "models/eggy/eggy_left_2.png",
-        "models/eggy/eggy_left_3.png",
-        "models/eggy/eggy_left_4.png",
-        "models/eggy/eggy_left_5.png",
-        "models/eggy/eggy_left_6.png",
-        "models/eggy/eggy_left_7.png",
-        "models/eggy/eggy_left_8.png",
+        "models/eggy/eggy_left_0.png",  //4
+        "models/eggy/eggy_left_1.png",  //5
+        "models/eggy/eggy_left_2.png",  //6 
+        "models/eggy/eggy_left_3.png",  //7
+        "models/eggy/eggy_left_4.png",  //8
+        "models/eggy/eggy_left_5.png",  //9
+        "models/eggy/eggy_left_6.png",  //10
+        "models/eggy/eggy_left_7.png",  //11
+        "models/eggy/eggy_left_8.png",  //12
 
-        "models/eggy/eggy_right_0.png",
-        "models/eggy/eggy_right_1.png",
-        "models/eggy/eggy_right_2.png",
-        "models/eggy/eggy_right_3.png",
-        "models/eggy/eggy_right_4.png",
-        "models/eggy/eggy_right_5.png",
-        "models/eggy/eggy_right_6.png",
-        "models/eggy/eggy_right_7.png",
-        "models/eggy/eggy_right_8.png"
+        "models/eggy/eggy_right_0.png", //13
+        "models/eggy/eggy_right_1.png", //14
+        "models/eggy/eggy_right_2.png", //15
+        "models/eggy/eggy_right_3.png", //16
+        "models/eggy/eggy_right_4.png", //17
+        "models/eggy/eggy_right_5.png", //18
+        "models/eggy/eggy_right_6.png", //19
+        "models/eggy/eggy_right_7.png", //20
+        "models/eggy/eggy_right_8.png"  //21
     };
 
     AnimationData idleAD  = {0,3, 0.2f};
     AnimationData leftAD  = {4,12, 0.05f};
-    AnimationData rightAD = {12,21, 0.05f};
+    AnimationData rightAD = {13,21, 0.05f};
 
     animation_query[PlayerMovement::PLAYER_IDLE] = idleAD;
     animation_query[PlayerMovement::PLAYER_LEFT] = leftAD;
     animation_query[PlayerMovement::PLAYER_RIGHT] = rightAD;
     
+    //This could be sped up
     Model templateModel("models/eggy/eggy_template.obj");
     
     mesh = Mesh(templateModel.meshes[0].vertices,templateModel.meshes[0].indices,tex_paths);
@@ -56,7 +57,10 @@ void Player::move(glm::vec2 dp){
 }
 
 void Player::ProcessKeyboard(PlayerMovement direction, float deltaTime){
-    if(current_movement != direction) texture_index = 0;
+    if(current_movement != direction){
+        texture_index = animation_query[direction].index_min;
+        animation_timer = 0;
+    }
 
     current_movement = direction;
     
@@ -103,7 +107,7 @@ void Player::animate(float deltaTime){
     bool inMvmnt = (current_movement == PlayerMovement::PLAYER_LEFT || current_movement == PlayerMovement::PLAYER_RIGHT);
     AnimationData ad = animation_query[current_movement];
 
-    if(inMvmnt && (animation_timer > ad.period)){
+    if(animation_timer > ad.period){
         texture_index++;
         if(texture_index > ad.index_max) 
             texture_index = ad.index_min;
@@ -118,14 +122,15 @@ void Player::handle_collisions(std::vector<Mesh*> terrain){
 
     //Add offset to player mesh (innificient to make whole new mesh instead of just the positions+offset)    
     
-    for(Vertex &v : mesh.vertices){
+    Mesh player_mesh = mesh;
+    for(Vertex &v : player_mesh.vertices){
         v.Position.x += position.x;
         v.Position.y += position.y;
     }
 
     //Future when more meshes check for groundplane to handle seperately
     for(Mesh* terrain_mesh : terrain){
-        if(mesh.check_collision(terrain_mesh)){
+        if(player_mesh.check_collision(terrain_mesh)){
 
             position = prev_position;
             grounded = true;
@@ -158,7 +163,8 @@ void Player::handle_physics(float dT, std::vector<Mesh*> collision_meshes){
         position.x = 0.5f;
     }
 
-    handle_collisions(collision_meshes);
+    if(position != prev_position)
+        handle_collisions(collision_meshes);
 }
 
 void Player::apply_force(float x, float y){
