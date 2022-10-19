@@ -9,6 +9,7 @@ class Map{
         Model ground;
         Model moon;
         std::vector<Model> background_layers = {};
+        std::vector<Mesh*> terrain_meshes;
         float time_offset;
 
 

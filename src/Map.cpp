@@ -6,6 +6,13 @@ Map::Map(): ground("models/eggy/map/eggy_ground.obj"), moon("models/eggy/map/egg
     background_layers.push_back(Model("models/eggy/map/eggy_background_2.obj"));
     background_layers.push_back(Model("models/eggy/map/eggy_background_3.obj"));
     background_layers.push_back(Model("models/eggy/map/eggy_background_4.obj"));
+
+    //Active terrain
+    for(Mesh &mesh : ground.meshes){
+        terrain_meshes.push_back(&mesh);
+    }
+    
+
 }
 
 void Map::draw(Shader& shader, glm::vec2 offset){
@@ -20,7 +27,7 @@ void Map::draw(Shader& shader, glm::vec2 offset){
     //draw moon
     moon.draw(shader);
 
-    float speedup = 2.0f;
+    float speedup = 2.05f;
 
     //draw extas
     for(int i = 1; i < background_layers.size(); i++){
