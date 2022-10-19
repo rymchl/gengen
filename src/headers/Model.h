@@ -18,6 +18,7 @@ class Model{
         bool gammaCorrection;
 
         Model(std::string const &path, bool gamma = false);
+        Model(std::string const &obj_path, std::vector<std::string> texture_paths, bool gamma = false);
         void draw(Shader &shader);	
 
     private:

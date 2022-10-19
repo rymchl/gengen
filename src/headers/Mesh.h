@@ -4,9 +4,34 @@
 #include <Vertex.h>
 #include <Texture.h>
 #include <Shader.h>
+#include <stb_image.h>
 
 #include <sstream>
 #include <vector>
+
+class Mesh {
+    public:
+        // mesh data
+        std::vector<Vertex>       vertices;
+        std::vector<unsigned int> indices;
+        std::vector<Texture>      textures;
+
+        int active_texture = -1;
+        Mesh() {};
+        Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);
+        Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<std::string> texture_paths);
+        void draw(Shader &shader);
+        void draw(Shader &shader, glm::vec3 color);
+
+        //returns direction of collision or 0vec if none
+        bool check_collision(Mesh* mesh);
+    private:
+        //  render data
+        unsigned int VAO, VBO, EBO;
+        
+
+        void setupMesh();
+};  
 
  class Tri{
     public:
@@ -69,25 +94,5 @@
                      && !sameside(point,tri->c,&A,&B));
             }
 };
-
-class Mesh {
-    public:
-        // mesh data
-        std::vector<Vertex>       vertices;
-        std::vector<unsigned int> indices;
-        std::vector<Texture>      textures;
-
-        Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);
-        void draw(Shader &shader);
-        void draw(Shader &shader, glm::vec3 color);
-
-        //returns direction of collision or 0vec if none
-        bool check_collision(Mesh* mesh);
-    private:
-        //  render data
-        unsigned int VAO, VBO, EBO;
-
-        void setupMesh();
-};  
 
 #endif

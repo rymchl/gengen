@@ -9,46 +9,46 @@ Player::Player() :
     mass(60),
     grounded(true),
     animation_timer(0),
-    model_frame(0) {
+    texture_index(0){
 
-    std::vector<Model> left_models   = {};
-    std::vector<Model> right_models  = {};
-    std::vector<Model> jump_models   = {};
-    std::vector<Model> idle_models   = {};
-    std::vector<Model> crouch_models = {};
+    std::vector<std::string> tex_paths{
+        "models/eggy/eggy_idle_0.png",
+        "models/eggy/eggy_idle_1.png",
+        "models/eggy/eggy_idle_2.png",
+        "models/eggy/eggy_idle_3.png",
 
-    left_models.push_back(Model("models/eggy/left_0.obj"));
-    left_models.push_back(Model("models/eggy/left_1.obj"));
-    left_models.push_back(Model("models/eggy/left_2.obj"));
-    left_models.push_back(Model("models/eggy/left_3.obj"));
-    left_models.push_back(Model("models/eggy/left_4.obj"));
-    left_models.push_back(Model("models/eggy/left_5.obj"));
-    left_models.push_back(Model("models/eggy/left_6.obj"));
-    left_models.push_back(Model("models/eggy/left_7.obj"));
-    left_models.push_back(Model("models/eggy/left_8.obj"));
+        "models/eggy/eggy_left_0.png",
+        "models/eggy/eggy_left_1.png",
+        "models/eggy/eggy_left_2.png",
+        "models/eggy/eggy_left_3.png",
+        "models/eggy/eggy_left_4.png",
+        "models/eggy/eggy_left_5.png",
+        "models/eggy/eggy_left_6.png",
+        "models/eggy/eggy_left_7.png",
+        "models/eggy/eggy_left_8.png",
 
-    right_models.push_back(Model("models/eggy/right_0.obj"));
-    right_models.push_back(Model("models/eggy/right_1.obj"));
-    right_models.push_back(Model("models/eggy/right_2.obj"));
-    right_models.push_back(Model("models/eggy/right_3.obj"));
-    right_models.push_back(Model("models/eggy/right_4.obj"));
-    right_models.push_back(Model("models/eggy/right_5.obj"));
-    right_models.push_back(Model("models/eggy/right_6.obj"));
-    right_models.push_back(Model("models/eggy/right_7.obj"));
-    right_models.push_back(Model("models/eggy/right_8.obj"));
-
-    idle_models.push_back(Model("models/eggy/idle_0.obj"));
-    idle_models.push_back(Model("models/eggy/idle_1.obj"));
-    idle_models.push_back(Model("models/eggy/idle_2.obj"));
-    idle_models.push_back(Model("models/eggy/idle_3.obj"));
-
-    models = {
-        left_models,
-        right_models,
-        jump_models,
-        crouch_models,
-        idle_models
+        "models/eggy/eggy_right_0.png",
+        "models/eggy/eggy_right_1.png",
+        "models/eggy/eggy_right_2.png",
+        "models/eggy/eggy_right_3.png",
+        "models/eggy/eggy_right_4.png",
+        "models/eggy/eggy_right_5.png",
+        "models/eggy/eggy_right_6.png",
+        "models/eggy/eggy_right_7.png",
+        "models/eggy/eggy_right_8.png"
     };
+
+    AnimationData idleAD  = {0,3, 0.2f};
+    AnimationData leftAD  = {4,12, 0.05f};
+    AnimationData rightAD = {12,21, 0.05f};
+
+    animation_query[PlayerMovement::PLAYER_IDLE] = idleAD;
+    animation_query[PlayerMovement::PLAYER_LEFT] = leftAD;
+    animation_query[PlayerMovement::PLAYER_RIGHT] = rightAD;
+    
+    Model templateModel("models/eggy/eggy_template.obj");
+    
+    mesh = Mesh(templateModel.meshes[0].vertices,templateModel.meshes[0].indices,tex_paths);
 }
 
 void Player::move(glm::vec2 dp){
@@ -56,7 +56,7 @@ void Player::move(glm::vec2 dp){
 }
 
 void Player::ProcessKeyboard(PlayerMovement direction, float deltaTime){
-    if(current_movement != direction) model_frame = 0;
+    if(current_movement != direction) texture_index = 0;
 
     current_movement = direction;
     
@@ -90,27 +90,23 @@ void Player::ProcessKeyboard(PlayerMovement direction, float deltaTime){
 void Player::draw(Shader& shader){
     shader.setVec2("uv_scale",glm::vec2(1,1));
     shader.setVec2("uv_offset",glm::vec2(0,0));
-    
     shader.setVec2("vertex_offset",position);
     
-    models[current_movement][model_frame].draw(shader);
-}
+    mesh.active_texture = texture_index;
 
-#define MVMT_ANIMATION_PERIOD 0.05f
-#define IDLE_ANIMATION_PERIOD 0.2f
+    mesh.draw(shader);
+}
 
 void Player::animate(float deltaTime){
     animation_timer += deltaTime;
 
     bool inMvmnt = (current_movement == PlayerMovement::PLAYER_LEFT || current_movement == PlayerMovement::PLAYER_RIGHT);
+    AnimationData ad = animation_query[current_movement];
 
-    if(inMvmnt && (animation_timer > MVMT_ANIMATION_PERIOD)){
-        model_frame = (model_frame + 1) % models[current_movement].size();
-        animation_timer = 0;
-    }
-
-    else if((current_movement == PlayerMovement::PLAYER_IDLE) && (animation_timer > IDLE_ANIMATION_PERIOD)) {
-        model_frame = (model_frame + 1) % models[current_movement].size();
+    if(inMvmnt && (animation_timer > ad.period)){
+        texture_index++;
+        if(texture_index > ad.index_max) 
+            texture_index = ad.index_min;
         animation_timer = 0;
     }
 
@@ -120,17 +116,16 @@ void Player::handle_collisions(std::vector<Mesh*> terrain){
 
     bool collision = false;
 
-
     //Add offset to player mesh (innificient to make whole new mesh instead of just the positions+offset)    
-    Mesh* player_mesh = new Mesh(models[current_movement][model_frame].meshes[0]);
-    for(Vertex &v : player_mesh->vertices){
+    
+    for(Vertex &v : mesh.vertices){
         v.Position.x += position.x;
         v.Position.y += position.y;
     }
 
     //Future when more meshes check for groundplane to handle seperately
     for(Mesh* terrain_mesh : terrain){
-        if(player_mesh->check_collision(terrain_mesh)){
+        if(mesh.check_collision(terrain_mesh)){
 
             position = prev_position;
             grounded = true;
