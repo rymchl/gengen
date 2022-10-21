@@ -1,4 +1,4 @@
-#include "headers/Model.h"
+#include <Model.h>
 
 unsigned int TextureFromFile(const char *path, const std::string &directory, bool gamma = false);
 
@@ -220,7 +220,7 @@ unsigned int TextureFromFile(const char *path, const std::string &directory, boo
     unsigned char *data = stbi_load(filename.c_str(), &width, &height, &nrComponents, 0);
 
     if(width%2 == 1 || height%2 == 1){
-        std::cout << "WARNING: TEXTUREFILE <" << path << "> HASS ODD WIDTH OR HEIGHT. MAY CAUSE ISSUES!" << std::endl;
+        std::cout << "WARNING: TEXTUREFILE <" << filename << "> HASS ODD WIDTH OR HEIGHT. MAY CAUSE ISSUES!" << std::endl;
     }
     
     LOG("TEXTURE_FROM_FILE<3> : stbi_load successful");

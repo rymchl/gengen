@@ -1,22 +1,27 @@
 #include <Map.h>
 
-Map::Map(): ground("models/eggy/map/eggy_ground.obj"), background_tex_count(6){
+Map::Map(): ground("models/eggy/map/ground/eggy_ground.obj"),
+            box("models/eggy/map/terrain/box.obj"),
+            background_tex_count(5){
 
     std::vector<std::string> tex_paths = {
-        "models/eggy/map/eggy_background_0.png",
-        "models/eggy/map/eggy_background_1.png",
-        "models/eggy/map/eggy_background_2.png",
-        "models/eggy/map/eggy_background_3.png",
-        "models/eggy/map/eggy_background_4.png",
-        "models/eggy/map/eggy_background_5.png"
+        "models/eggy/map/background/0.png",
+        "models/eggy/map/background/1.png",
+        "models/eggy/map/background/2.png",
+        "models/eggy/map/background/3.png",
+        "models/eggy/map/background/4.png",
     };
 
-    Model templateModel("models/eggy/map/eggy_background_template.obj");
+    Model templateModel("models/eggy/map/background/template.obj");
 
     background = Mesh(templateModel.meshes[0].vertices,templateModel.meshes[0].indices,tex_paths);
 
+
     //Active terrain
     for(Mesh &mesh : ground.meshes){
+        terrain_meshes.push_back(&mesh);
+    }
+    for(Mesh &mesh : box.meshes){
         terrain_meshes.push_back(&mesh);
     }
     
@@ -55,6 +60,8 @@ void Map::draw(Shader& shader, glm::vec2 offset){
     shader.setFloat("depth_offset", 0);
 
     //draw ground
+    shader.setVec2("uv_offset",glm::vec2(0,0));
+    box.draw(shader);
     shader.setVec2("uv_offset",glm::vec2(-1,0) * offset.x * 8.0f);
     ground.draw(shader);
 

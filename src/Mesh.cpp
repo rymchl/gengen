@@ -1,4 +1,4 @@
-#include "headers/Mesh.h"
+#include <Mesh.h>
 
 Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures)
 {
@@ -124,45 +124,17 @@ void Mesh::draw(Shader &shader)
     glBindVertexArray(0);
 }  
 
-bool Mesh::check_collision(Mesh* mesh){
-    std::vector<Tri> trisA;
-    std::vector<Tri> trisB;
-
-    std::vector<glm::vec3*> tri_points;
-    int i = 0;
-    for(const unsigned int &index : indices){
-        
-        tri_points.push_back(&vertices[index].Position);
-        i++;
-        
-        if(i % 3 == 0){
-            trisA.push_back(Tri(tri_points[0],tri_points[1],tri_points[2]));
-            tri_points.clear();
-            i = 0;
-        }
-
-    }
-
-    //i should = 0 and tri_points should be empty
-
-    for(const unsigned int &index : mesh->indices){
-        
-        tri_points.push_back(&mesh->vertices[index].Position);
-        i++;
-        
-        if(i % 3 == 0){
-            trisB.push_back(Tri(tri_points[0],tri_points[1],tri_points[2]));
-            tri_points.clear();
-            i = 0;
-        }
-
-    }
+Tri Mesh::check_collision(Mesh* mesh){
+    std::vector<Tri> trisA = getTris();
+    std::vector<Tri> trisB = mesh->getTris();
 
     for(const Tri& A : trisA){
         for(const Tri& B : trisB){
-            if(A.check_collision(&B)) return true;
+            if(A.check_collision(&B)){
+                return B;
+            }
         }
     }
 
-    return false;
+    return Tri(nullptr,nullptr,nullptr);
 }

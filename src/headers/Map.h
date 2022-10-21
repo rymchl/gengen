@@ -12,6 +12,7 @@ class Map{
         Mesh background;
         unsigned int background_tex_count;
         Model ground;
+        Model box;
         std::vector<Mesh*> terrain_meshes;
         float time_offset;
 

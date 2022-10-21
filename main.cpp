@@ -1,3 +1,16 @@
+/*#include "src/headers/Misc.h"
+int main(){
+
+    Tri tri(new glm::vec3(0,-1,0), new glm::vec3(1,-1,0), new glm::vec3(1,0,0));
+
+    Intersection i0 = find_intersection(glm::vec2(-1,1),glm::vec2(2,-2),glm::vec2(0,-1),glm::vec2(1,1));
+    i0.print();
+
+    Intersection i1 = find_min_intersection(glm::vec2(-1,1),glm::vec2(2,-2),tri);
+    i1.print();
+
+    return 0;
+}*/
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
@@ -16,24 +29,12 @@ GameState gamestate;
 #include <init_glfw.h>
 #include <input.h>
 
-
-
+#include <unistd.h>
 #include <iostream>
+
 
 int main()
 {
-/*
-    Tri A(new glm::vec3(-1,-1,0),new glm::vec3(-1,1,0),new glm::vec3(1,-1,0));
-    Tri Bi(new glm::vec3(-0.5f,0,0),new glm::vec3(1,0,0),new glm::vec3(1,1,0));
-    Tri Bni(new glm::vec3(0.1f,0,0),new glm::vec3(1,0,0),new glm::vec3(1,1,0));
-
-    if(!A.check_collision(&Bi)) printf("fail\n");
-    else printf("pass\n");
-    if(!A.check_collision(&Bni))printf("pass\n");
-    else printf("fail\n");
-
-    return -1;
-*/
     // Init all GLFW/GLEW stuff and grab window*
     GLFWwindow* window = init_glfw(SCR_WIDTH, SCR_HEIGHT, "gengen");
 
@@ -57,6 +58,8 @@ int main()
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
+
+
         player_ptr->animate(deltaTime);
         map.time_offset += deltaTime;
                 
@@ -69,6 +72,9 @@ int main()
         // ------
         player_ptr->handle_physics(deltaTime,map.terrain_meshes);
         
+        if(player_ptr->grounded) printf("GROUNDED\n");
+        else printf("IN AIR\n");
+
         // render
         // ------
         glClearColor(0.05f, 0.05f, 0.05f, 1.0f);
@@ -91,4 +97,3 @@ int main()
     glfwTerminate();
     return 0;
 }
-
